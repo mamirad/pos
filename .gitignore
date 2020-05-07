@@ -70,4 +70,4 @@ pickle-email-*.html
 /config/application.yml
 
 # Ignore the bundled gemfile
-Gemfile.lock
+# Gemfile.lock
