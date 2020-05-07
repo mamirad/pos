@@ -43,7 +43,7 @@ class SalesController < ApplicationController
     populate_items
 
     if params[:search][:item_category].blank?
-      @available_items = Item.all.where('name ILIKE ? AND published = true OR description ILIKE ? AND published = true OR sku ILIKE ? AND published = true', "%#{params[:search][:item_name]}%", "%#{params[:search][:item_name]}%", "%#{params[:search][:item_name]}%").limit(5)
+      @available_items = Item.all.where('name ILIKE ? AND published = true OR description ILIKE ? AND published = true OR sku ILIKE ? AND published = true', "%#{params[:search][:item_name]}%", "%#{params[:search][:item_name]}%", "%#{params[:search][:item_name]}%")
     elsif params[:search][:item_name].blank?
       @available_items = Item.where(item_category_id: params[:search][:item_category]).limit(5)
     else
@@ -136,14 +136,16 @@ class SalesController < ApplicationController
     populate_items
 
     line_item = LineItem.where(sale_id: params[:sale_id], item_id: params[:item_id]).first
-    line_item.quantity += 1
-    line_item.save
+    if line_item.item.stock_amount>line_item.quantity
+      line_item.quantity += 1 
+      line_item.save
+
 
     remove_item_from_stock(params[:item_id], 1)
     update_line_item_totals(line_item)
 
     update_totals
-
+  end
     respond_to do |format|
       format.js { ajax_refresh }
     end

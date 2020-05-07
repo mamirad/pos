@@ -11,3 +11,6 @@
 for i in (1..2000)
 	Item.create(:sku => i, :name => "#{i}Name", :price => "12.00", :stock_amount => "100")
 end
+
+StoreConfiguration.create(store_name: 'validsol',email_address: 'amirad2020@gmail.com',website_url: 'http://validsol.com',currency: '$')
+User.create(username:'admin@gmail.com',email:'admin@gmail.com',password:'aaaaaa')

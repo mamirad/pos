@@ -1,4 +1,4 @@
-class CreateItems < ActiveRecord::Migration
+class CreateItems < ActiveRecord::Migration[4.2]
   def change
     create_table :items do |t|
     	t.string :sku
@@ -9,6 +9,7 @@ class CreateItems < ActiveRecord::Migration
       t.integer :amount_sold, :default => 0
       t.decimal :cost_price, :precision => 8, :scale => 2
       t.boolean :published, :default => true
+      t.integer :stock_in_handss
 
       t.timestamps
     end

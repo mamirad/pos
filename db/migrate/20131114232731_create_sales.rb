@@ -1,4 +1,4 @@
-class CreateSales < ActiveRecord::Migration
+class CreateSales < ActiveRecord::Migration[4.2]
   def change
     create_table :sales do |t|
     	t.decimal :amount, :precision => 8, :scale => 2

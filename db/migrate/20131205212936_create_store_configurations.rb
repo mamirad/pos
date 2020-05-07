@@ -1,4 +1,4 @@
-class CreateStoreConfigurations < ActiveRecord::Migration
+class CreateStoreConfigurations < ActiveRecord::Migration[4.2]
   def change
     create_table :store_configurations do |t|
       t.string :store_name
