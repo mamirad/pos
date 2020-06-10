@@ -7,9 +7,13 @@ default: &default
 
 production:
   <<: *default
-  database:
+  username: deploy
+  password: India4@)
+  database: pos_development
 
 
 development:
   <<: *default
   database: pos_development
+
+
