@@ -53,4 +53,5 @@ class Sale < ActiveRecord::Base
     self.customer_id = customer_id
     self.save
   end
+
 end

@@ -31,6 +31,7 @@ PushvendorPos::Application.routes.draw do
     get 'search'
     collection do
       get 'search'
+      get 'auto_search'
     end
   end
 

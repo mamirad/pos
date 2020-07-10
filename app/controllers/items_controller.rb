@@ -1,6 +1,17 @@
 class ItemsController < ApplicationController
   before_action :set_item, only: [:show, :edit, :update, :destroy]
+  def auto_search
+     search_item = {name_cont: params[:q],id_eq: params[:q],m:'or'}
+    @items = Item.ransack(search_item).result(distinct: true)
 
+
+    respond_to do |format|
+      format.html{}
+      format.json{
+        @items = @items.limit(5)
+      } 
+    end
+  end
   def index
     @items = Item.paginate(page: params[:page], per_page: 20).where(published: true)
   end

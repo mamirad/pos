@@ -23,6 +23,7 @@ gem 'toastr-rails'
 gem "breadcrumbs_on_rails"
 gem 'will_paginate-bootstrap', '1.0.1'
 gem "cancan"
+gem 'ransack', github: 'activerecord-hackery/ransack'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 5.2.3'
 # Use mysql as the database for Active Record

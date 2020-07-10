@@ -1,5 +1,6 @@
 class SalesController < ApplicationController
   before_action :set_configurations
+  before_action :get_stock_in_hand, only: [:create_line_item, :add_item]
 
   def index
     @sales = Sale.paginate(page: params[:page], per_page: 2).order('id DESC')
@@ -43,13 +44,12 @@ class SalesController < ApplicationController
     populate_items
 
     if params[:search][:item_category].blank?
-      @available_items = Item.all.where('name ILIKE ? AND published = true OR description ILIKE ? AND published = true OR sku ILIKE ? AND published = true', "%#{params[:search][:item_name]}%", "%#{params[:search][:item_name]}%", "%#{params[:search][:item_name]}%")
+      @available_items = Item.all.where('name ILIKE ? AND published = true OR description ILIKE ? AND published = true OR sku ILIKE ? AND published = true', "%#{params[:search][:item_name]}%", "%#{params[:search][:item_name]}%", "%#{params[:search][:item_name]}%").limit(5)
     elsif params[:search][:item_name].blank?
       @available_items = Item.where(item_category_id: params[:search][:item_category]).limit(5)
     else
       @available_items = Item.all.where('name ILIKE ? AND published = true AND item_category_id = ? OR description ILIKE ? AND published = true AND item_category_id = ? OR sku ILIKE ? AND published = true AND item_category_id = ?', "%#{params[:search][:item_name]}%", "#{params[:search][:item_category]}", "%#{params[:search][:item_name]}%", "#{params[:search][:item_category]}", "%#{params[:search][:item_name]}%", "#{params[:search][:item_category]}").limit(5)
     end
-
     respond_to do |format|
       format.js { ajax_refresh }
     end
@@ -82,22 +82,30 @@ class SalesController < ApplicationController
   def create_line_item
     set_sale
     populate_items
-
     existing_line_item = LineItem.where('item_id = ? AND sale_id = ?', params[:item_id], @sale.id).first
-
     if existing_line_item.blank?
-      line_item = LineItem.new(item_id: params[:item_id], sale_id: params[:sale_id], quantity: params[:quantity])
-      line_item.price = line_item.item.price
-      line_item.save
+      if @stock_in_hand.to_i>1
+        line_item = LineItem.new(item_id: params[:item_id], sale_id: params[:sale_id], quantity: params[:quantity])
+        line_item.price = line_item.item.price
+        line_item.save
 
-      remove_item_from_stock(params[:item_id], 1)
-      update_line_item_totals(line_item)
+
+        remove_item_from_stock(params[:item_id], 1)
+        update_line_item_totals(line_item)
+        flash.now[:success]="Item added now "
+      else
+        flash.now[:error]= 'Item is out of stock'  
+      end  
     else
-      existing_line_item.quantity += 1
-      existing_line_item.save
+      if @stock_in_hand>1
+        existing_line_item.quantity += 1
+        existing_line_item.save
 
-      remove_item_from_stock(params[:item_id], 1)
-      update_line_item_totals(existing_line_item)
+        remove_item_from_stock(params[:item_id], 1)
+        update_line_item_totals(existing_line_item)
+      else
+         flash.now[:error] = 'Item is out of stock'
+      end     
     end
 
     update_totals
@@ -124,7 +132,7 @@ class SalesController < ApplicationController
     return_item_to_stock(params[:item_id], 1)
 
     update_totals
-
+    flash.now[:notice]="Item count down"
     respond_to do |format|
       format.js { ajax_refresh }
     end
@@ -135,17 +143,22 @@ class SalesController < ApplicationController
     set_sale
     populate_items
 
-    line_item = LineItem.where(sale_id: params[:sale_id], item_id: params[:item_id]).first
-    if line_item.item.stock_amount>line_item.quantity
+    if @stock_in_hand>1
+      line_item = LineItem.where(sale_id: params[:sale_id], item_id: params[:item_id]).first
+      
       line_item.quantity += 1 
       line_item.save
 
 
-    remove_item_from_stock(params[:item_id], 1)
-    update_line_item_totals(line_item)
+      remove_item_from_stock(params[:item_id], 1)
+      update_line_item_totals(line_item)
 
-    update_totals
-  end
+      update_totals
+      flash.now[:success]="Item added now "
+     
+    else
+      flash.now[:error]= "Item is out of stock"
+    end  
     respond_to do |format|
       format.js { ajax_refresh }
     end
@@ -193,11 +206,14 @@ class SalesController < ApplicationController
     custom_customer.state = params[:custom_customer][:state]
     custom_customer.zip = params[:custom_customer][:zip]
 
-    custom_customer.save
+    if custom_customer.save
+      @sale.add_customer(custom_customer.id)
+      update_totals
+      flash[:success] = "Customer has been created successfully"
 
-    @sale.add_customer(custom_customer.id)
+    end
 
-    update_totals
+
 
     respond_to do |format|
       format.js { ajax_refresh }
@@ -319,7 +335,8 @@ class SalesController < ApplicationController
   end
 
   def populate_items
-    @available_items = Item.all.where(published: true).limit(5)
+    # @available_items = Item.all.where(published: true).limit(5)
+    @available_items = Item.all.order('amount_sold DESC').limit(5)
   end
 
   def populate_customers
@@ -345,5 +362,8 @@ class SalesController < ApplicationController
     else
       return @configurations.tax_rate.to_f * 0.01
     end
+  end
+  def get_stock_in_hand
+    @stock_in_hand = Item.find(params[:item_id]).stock_amount
   end
 end

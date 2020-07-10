@@ -1,3 +1,12 @@
+GIT
+  remote: https://github.com/activerecord-hackery/ransack.git
+  revision: c9cc20de9e0f7bab92e0579c85bed64d614d23de
+  specs:
+    ransack (2.3.2)
+      activerecord (>= 5.2.1)
+      activesupport (>= 5.2.1)
+      i18n
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -283,6 +292,7 @@ DEPENDENCIES
   pundit
   rails (~> 5.2.3)
   rails-erd
+  ransack!
   sass-rails (~> 5.0)
   spring
   spring-watcher-listen (~> 2.0.0)
