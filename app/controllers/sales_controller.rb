@@ -3,7 +3,7 @@ class SalesController < ApplicationController
   before_action :get_stock_in_hand, only: [:create_line_item, :add_item]
 
   def index
-    @sales = Sale.paginate(page: params[:page], per_page: 2).order('id DESC')
+    @sales = Sale.paginate(page: params[:page], per_page: 10).order('total_amount DESC')
   end
 
   def new
@@ -42,14 +42,30 @@ class SalesController < ApplicationController
   def update_line_item_options
     set_sale
     populate_items
+    options={}
+    options.deep_merge!(published:true)
+    options.deep_merge!(item_category_id:params[:search][:item_category]) if params[:search][:item_category].present?
+    options.deep_merge!("raw_query":"name ILIKE '%#{params[:search][:item_name]}%'") if params[:search][:item_name].present?
+    
+    @available_items = Item.where(options).where(options[:raw_query]).limit(5)
+    # if params[:search][:item_category].blank?
+    #   @available_items = Item.all.where('name ILIKE ? AND published = true OR description ILIKE ? AND published = true OR sku ILIKE ? AND published = true', "%#{params[:search][:item_name]}%", "%#{params[:search][:item_name]}%", "%#{params[:search][:item_name]}%").limit(5)
+    # elsif params[:search][:item_name].blank?
+    #   @available_items = Item.where(item_category_id: params[:search][:item_category]).limit(5)
+    # else
+    #   @available_items = Item.all.where(
+    #     'name ILIKE ? 
+    #     AND published = true 
+    #     AND item_category_id = ? 
+    #     OR description ILIKE ? 
+    #     AND published = true 
+    #     AND item_category_id = ? 
+    #     OR sku ILIKE ? 
+    #     AND published = true
+    #      AND item_category_id = ?', "%#{params[:search][:item_name]}%", "#{params[:search][:item_category]}", "%#{params[:search][:item_name]}%", "#{params[:search][:item_category]}", "%#{params[:search][:item_name]}%", "#{params[:search][:item_category]}").limit(5)
+   
 
-    if params[:search][:item_category].blank?
-      @available_items = Item.all.where('name ILIKE ? AND published = true OR description ILIKE ? AND published = true OR sku ILIKE ? AND published = true', "%#{params[:search][:item_name]}%", "%#{params[:search][:item_name]}%", "%#{params[:search][:item_name]}%").limit(5)
-    elsif params[:search][:item_name].blank?
-      @available_items = Item.where(item_category_id: params[:search][:item_category]).limit(5)
-    else
-      @available_items = Item.all.where('name ILIKE ? AND published = true AND item_category_id = ? OR description ILIKE ? AND published = true AND item_category_id = ? OR sku ILIKE ? AND published = true AND item_category_id = ?', "%#{params[:search][:item_name]}%", "#{params[:search][:item_category]}", "%#{params[:search][:item_name]}%", "#{params[:search][:item_category]}", "%#{params[:search][:item_name]}%", "#{params[:search][:item_category]}").limit(5)
-    end
+    # end
     respond_to do |format|
       format.js { ajax_refresh }
     end
@@ -133,6 +149,19 @@ class SalesController < ApplicationController
 
     update_totals
     flash.now[:notice]="Item count down"
+    respond_to do |format|
+      format.js { ajax_refresh }
+    end
+  end
+
+  def remove_all_items
+    set_sale
+    populate_items
+    line_item = LineItem.where(sale_id: params[:id], item_id: params[:item_id]).first
+    return_item_to_stock(params[:item_id], line_item.quantity.to_i)
+    line_item.destroy
+    update_totals
+    flash.now[:notice]="Item(s) removed successfully "
     respond_to do |format|
       format.js { ajax_refresh }
     end
@@ -231,6 +260,21 @@ class SalesController < ApplicationController
     item = Item.where(sku: params[:override_price][:line_item_sku]).first
     line_item = LineItem.where(sale_id: params[:override_price][:sale_id], item_id: item.id).first
     line_item.price = params[:override_price][:price].gsub('$', '')
+    line_item.save
+
+    update_line_item_totals(line_item)
+    update_totals
+
+    respond_to do |format|
+      format.js { ajax_refresh }
+    end
+  end
+
+  def override_quantity
+    @sale = Sale.find(params[:override_quantity][:sale_id])
+    item = Item.where(sku: params[:override_quantity][:line_item_sku]).first
+    line_item = LineItem.where(sale_id: params[:override_quantity][:sale_id], item_id: item.id).first
+    line_item.quantity = params[:override_quantity][:quantity].to_i
     line_item.save
 
     update_line_item_totals(line_item)

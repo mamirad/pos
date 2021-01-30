@@ -30,6 +30,19 @@ $(document).ready(function(){
     });
   	// alert('price');
 	});
+	
+	$(document).on("change", "#line_item_quantity", function(){
+	
+		$.ajax({
+      type: "POST",
+      url: '/sales/override_quantity', //sumbits it to the given url of the form
+      data: {override_quantity: { quantity: $(this).val(), line_item_sku: $(this).parent().parent().find('.line_item_sku').val(), sale_id: $(document).find('.sale_id').html() }},
+      dataType: "script",
+      success: function() {
+      	console.log('price updated');
+      }
+    });
+	});
 
 	$(document).on("change", "#sale_discount", function(){
 		$.ajax({
@@ -112,5 +125,13 @@ $(document).ready(function(){
 		    });
 		  }
 		});
+
+
+
+$(document).ready(function(){
+  $(".filter_toggle").click(function(){
+    $(".filter_box").fadeToggle();
+  });
+});
 
 });

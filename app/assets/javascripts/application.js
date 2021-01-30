@@ -15,6 +15,8 @@
 //= require toastr
 //= require easyautocomplete/jquery.easy-autocomplete
 //= require easyautocomplete/search
+//= require select2-full
+//= require parsley
 //= require_tree .
 
 
@@ -35,4 +37,11 @@ $(document).ready(function() {
         "showMethod": "fadeIn",
         "hideMethod": "fadeOut"
     }
+});
+
+$(document).ajaxStart(function () {
+    $('.overlay').show();
+
+}).ajaxStop(function () {
+    $('.overlay').hide();
 });

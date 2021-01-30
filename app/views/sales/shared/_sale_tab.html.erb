@@ -3,27 +3,28 @@
     <h4 class="text-primary"><span class="glyphicon glyphicon-search"></span> Find</h4>
 
     <hr />
-      <input placeholder="Search" data-behavior="autocomplete" data-sale-id="<%=@sale.id%>" class="form-control" type="text" name="q" id="auto_search_item" autocomplete="off">
     <%= form_for :search, :url => url_for(:controller => "sales", :action => "update_line_item_options", :format => :js), :method => "get", :remote => true do |f| %>
-      <div class="form-group">
-        <%= f.text_field :item_name, :class => "form-control item_search_input awesomplete", list: 'items-list', :placeholder => "Search Items", :autofocus => true %>
+      <input placeholder="Search" data-behavior="autocomplete" data-sale-id="<%=@sale.id%>" class="form-control" type="text" name="q" id="auto_search_item" autocomplete="off">
+      <br>
+      <!-- <div class="form-group">
+        <%#= f.text_field :item_name, :class => "form-control item_search_input awesomplete", list: 'items-list', :placeholder => "Search Items", :autofocus => true %>
           <datalist id="items-list"> 
-          <% @available_items.each do |itm| %>
-          <%= link_to "link1", "#",{:remote => true, 'data-toggle' =>  "modal", 'data-target' => '#modal-window'} %>
+          <#% @available_items.each do |itm| %>
+          <%#= link_to "link1", "#",{:remote => true, 'data-toggle' =>  "modal", 'data-target' => '#modal-window'} %>
 
-            <!-- Don't remove the '.|' -->
              <option value=""> 
-              <%= itm.id %>.|
-               <%= itm.name %>  | stk amount:
-               <%= itm.stock_amount %>
+              <%#= itm.id %>.|
+               <%#= itm.name %>  | stk amount:
+               <%#= itm.stock_amount %>
             </option> 
-          <%end %>
+          <%#end %>
          </datalist>
        
-      </div>
+      </div> -->
       <div class="form-group">
         <%= f.collection_select :item_category, ItemCategory.all, :id, :name, {prompt: "Select a category"}, {class: "form-control item_category_search_input"}  %>
       </div>
+
       <%= f.hidden_field :sale_id, :value => @sale.id %>
       <%= submit_tag "search", :class => "btn btn-primary btn-lg item_search" %>
     <% end %>

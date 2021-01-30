@@ -1,13 +1,12 @@
 <h4 class="text-primary"><span class="glyphicon glyphicon-tags"></span> Searched Items</h4>
 <hr />
 <div class="table-responsive">
-  <!-- <table id="my_datatable" class="display" style="width: 100%;"> -->
     <table class="table table-bordered">
     <thead>
       <tr>
         <th>#</th>
         <th>Item</th>
-        <th>Description</th>
+        <th>Category | Brand</th>
         <th>Price</th>
         <th>Stock in Hand</th>
         <th>Add</th>
@@ -20,26 +19,14 @@
           <tr>
             <td style="width:0px !important;"><%= item.sku %></td>
             <td><%= item.name %></td>
-            <td><%= item.description %></td>
+            <td><%= item.item_category&.name %>| <%=item.brand%></td>
             <td><%= number_to_currency(item.price, unit: config.currency) %></td>
-            <td><%= item.stock_amount %></td>
+            <td><%= item.stock_amount %><%= item.item_unit %></td>
             <td class="add_to_current_sale"><%= link_to url_for(:controller => 'sales', :action => 'create_line_item', :item_id => item.id, :sale_id => @sale.id, :quantity => 1), :remote => true do %><p><span class="glyphicon glyphicon-plus"></span></p><% end %></td>
           </tr>
         <% end %>
       <% end %>
     </tbody>
-    <!--   <tfoot>
-        <tr>
-          <th>#</th>
-        <th>Item</th>
-        <th>Description</th>
-        <th>Price</th>
-        <th>Stock in Hand</th>
-        <th>Add</th>
-
-
-        </tr>
-      </tfoot>   -->
   </table>
 </div>
 

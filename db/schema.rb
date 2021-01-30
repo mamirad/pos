@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2014_04_20_165735) do
+ActiveRecord::Schema.define(version: 2021_01_20_043504) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -45,9 +45,29 @@ ActiveRecord::Schema.define(version: 2014_04_20_165735) do
     t.integer "amount_sold", default: 0
     t.decimal "cost_price", precision: 8, scale: 2
     t.boolean "published", default: true
+    t.integer "stock_in_handss"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer "item_category_id"
+    t.string "supplier"
+    t.date "manufacture_at"
+    t.date "expire_at"
+    t.integer "min_items"
+    t.integer "item_unit"
+    t.integer "status"
+    t.string "document"
+    t.integer "lot"
+    t.string "brand"
+    t.integer "supplier_id"
+  end
+
+  create_table "items_returns", force: :cascade do |t|
+    t.integer "quantity"
+    t.date "return_at"
+    t.bigint "item_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["item_id"], name: "index_items_returns_on_item_id"
   end
 
   create_table "line_items", id: :serial, force: :cascade do |t|
@@ -96,6 +116,13 @@ ActiveRecord::Schema.define(version: 2014_04_20_165735) do
     t.datetime "updated_at"
   end
 
+  create_table "suppliers", force: :cascade do |t|
+    t.string "name"
+    t.string "phone"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "users", id: :serial, force: :cascade do |t|
     t.string "username", default: "", null: false
     t.string "email", default: "", null: false
@@ -121,4 +148,5 @@ ActiveRecord::Schema.define(version: 2014_04_20_165735) do
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
+  add_foreign_key "items_returns", "items"
 end

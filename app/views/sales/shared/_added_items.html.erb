@@ -23,7 +23,10 @@
               <input type="text" id="line_item_price" class='form-control price_control' value="<%= number_to_currency(@line_item.price, unit: config.currency) %>">
             </td>
             <td class="amount">
-              <%= text_field(:line_item, :quantity, :class => 'form-control price_control', :readonly => 'readonly') %>
+              <%= link_to '', remove_all_items_sale_path(@sale.id,item_id:e.object.id),remote:true,class: 'glyphicon glyphicon-trash',data: { confirm: 'Are you sure?' } %>
+
+              <%= text_field(:line_item, :quantity, :class => 'form-control price_control') %>
+
               <div class="adjust hidden-print">
                 <%= link_to url_for(:controller => 'sales', :action => 'add_item', :item_id => e.object.id, :sale_id => @sale.id), :remote => true do %>
                   <span class="glyphicon glyphicon-plus"></span>

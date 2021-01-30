@@ -13,4 +13,7 @@
  *= require toastr
   *= require easyautocomplete/easy-autocomplete
  *= require easyautocomplete/easy-autocomplete.themes
+ *= require select2
+ *= require parsley
+
  */

@@ -1,5 +1,7 @@
 PushvendorPos::Application.routes.draw do
 
+  resources :suppliers
+  resources :items_returns
   resources :item_categories
 
   resources :reports do
@@ -32,6 +34,8 @@ PushvendorPos::Application.routes.draw do
     collection do
       get 'search'
       get 'auto_search'
+      post 'import'
+      get 'pick_file'
     end
   end
 
@@ -48,7 +52,11 @@ PushvendorPos::Application.routes.draw do
       get 'create_custom_customer'
       get 'add_comment'
       post 'override_price'
+      post 'override_quantity'
       post 'sale_discount'
+    end
+    member do
+      get 'remove_all_items'
     end
   end
 

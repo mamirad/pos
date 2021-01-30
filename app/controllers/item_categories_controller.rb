@@ -7,6 +7,10 @@ class ItemCategoriesController < ApplicationController
 
   def new
     @item_category = ItemCategory.new
+    respond_to do |format|
+      format.js{}
+      format.html{}
+    end
   end
 
   def show
@@ -20,9 +24,22 @@ class ItemCategoriesController < ApplicationController
 
     if @item_category.save
       flash[:notice] = 'Item category was successfully created.'
-      redirect_to @item_category
+      respond_to do |format|
+        format.html{
+          redirect_to @item_category
+        }
+        format.js{}
+      end
     else
-      render action: 'new'
+      @errors = @item_category.errors
+      respond_to do |format|
+        format.html{
+          render action: 'new'
+        }
+        format.js{
+          flash.now[:notice] = @errors.to_a
+        }
+      end
     end
   end
 

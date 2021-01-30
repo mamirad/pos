@@ -1,28 +1,83 @@
 <div class="panel panel-default">
+  <div class="panel-heading">
+    <div class="row">
+            <div class="col-md-4 text-left">Items</div>
+            <div class="col-md-4 text-center">
+              
+            </div>
+            <div class="col-md-4 text-right">
+              <%= link_to 'New Item', new_item_path, remote:true, :class => "btn btn-success btn-lg active" %>
+              <%= link_to 'Import Item(s)', pick_file_items_path, remote:true, :class => "btn btn-success btn-lg active" %>
+            </div>
+          </div>
+  </div>
+<button class="btn btn-default filter_toggle text-right btn-filter">Filter</button>
+<%= link_to 'Reset', items_path if @filer_reset%>
+<div class="filter_box">
+  <%=form_tag items_path, method: :get do%>
+        <div class="row">
+          <div class="col-md-6">
+            <label>Item Name</label>
+            <%= text_field_tag :item_name,params[:item_name],class: 'form-control'%>
+          </div>
+           <div class="col-md-6">
+            <label>Category</label>
+            <%=select_tag :item_category, options_for_select(ItemCategory.all.map{|category|[category.name,category.id]},params[:item_category]),class: 'form-control',include_blank: 'Category'%>
+           </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <label>Brand</label>
+            <%= text_field_tag :brand,params[:brand],class:'form-control' %>
+          </div>
+           <div class="col-md-6">
+          <label>Expire items <%=check_box_tag :is_expired,{},params[:is_expired]%></label>
+           </div>
+        </div>
+
+          <button type="submit">Submit</button>
+
+  <%end%>
+</div>
+
+<div class="panel panel-default">
     <div class="table-responsive">
-      <table class="table table-striped table-bordered table-hover">
+      <table class="table table-striped table-bordered table-hover" id="items-table">
         <thead>
           <tr>
             <th>#</th>
             <th>Item</th>
             <th>Category</th>
+            <th>Brand</th>
             <th>Available</th>
+            <th>Expire</th>
             <th>Sold</th>
             <th>Price</th>
+            <th>Supplier</th>
             <th>Actions</th>
           </tr>
         </thead>
 
         <tbody>
           <% @items.each do |item| %>
-            <tr class="<%= item.stock_amount > 0 ? '' : 'danger' %>">
+            <tr class="<%= item.stock_amount > 0 ? '' : 'danger' %>" id="item-<%=item.id%>">
               <td><%= item.sku %></td>
               <td><%= item.name %></td>
               <td><%= item.item_category.blank? ? '-' : item.item_category.name %></td>
-              <td><%= item.stock_amount %></td>
+              <td><%= item.brand%></td>
+              <td><%= item.stock_amount %><%= item.item_unit %></td>
+              <td class=<%=expire_at(item.expire_at)%>>
+                <%= item.expire_at%>
+                </td>
               <td><%= item.amount_sold %></td>
-              <td><%= number_to_currency(item.price , unit: config.currency)%></td>
-              <td><%= link_to 'Show', edit_item_path(item) %> | <%= link_to 'Destroy', item, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+              <td>
+                <span class="glyphicon glyphicon-download"></span><%= number_to_currency(item.price , unit: config.currency)%>
+                <span class="glyphicon glyphicon-upload"></span><%= number_to_currency(item.cost_price , unit: config.currency)%>
+              </td>
+              <td><%=item.supplier.name if item.supplier.present?%></td>
+              <td>
+                <%= link_to 'Show', edit_item_path(item),remote:true, class: 'btn btn-xs btn-default' %> 
+                | <%= link_to 'Destroy', item, method: :delete, class: 'btn btn-xs btn-danger', data: { confirm: 'Are you sure?' } %></td>
             </tr>
           <% end %>
         </tbody>
@@ -35,5 +90,6 @@
 </div>
 
     <div class="col-sm-12">
-      <%= link_to 'New Item', new_item_path, :class => "btn btn-success btn-lg active" %>
+      
     </div>
+</div>
